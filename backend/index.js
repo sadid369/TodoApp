@@ -17,8 +17,9 @@ mongoose.connect(process.env.MONGO_DB_URL, {
 });
 
 // Middleware Connections
-app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cors());
 
 
 // Routes
@@ -54,7 +55,8 @@ app.put('/completed', async (req, res) => {
             return res.status(411).json({ msg: "You sent the wrong input" + parsedPayload.error });
         }
         const { id } = createPayload;
-        const todo = await Todo.findOneAndUpdate({ _id: id }, { completed: true }, { new: true });
+        const isCompleted = await Todo.findOne({ _id: id });
+        const todo = await Todo.findOneAndUpdate({ _id: id }, { completed: !isCompleted.completed }, { new: true });
         res.status(201).json(todo);
     } catch (error) {
         res.status(500).send(error.message);
